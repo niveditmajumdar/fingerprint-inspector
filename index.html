@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fingerprint Inspector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    html {
+      font-size: 26px;
+    }
+
+    :root {
+      --bg: #080c14;
+      --surface: #0e1420;
+      --surface2: #141c2e;
+      --border: #1e2d4a;
+      --orange: #ff5e24;
+      --orange-dim: rgba(255, 94, 36, 0.12);
+      --teal: #00c9a7;
+      --teal-dim: rgba(0, 201, 167, 0.1);
+      --blue: #38bdf8;
+      --blue-dim: rgba(56, 189, 248, 0.1);
+      --green: #34d399;
+      --green-dim: rgba(52, 211, 153, 0.1);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251, 191, 36, 0.1);
+      --red: #f87171;
+      --red-dim: rgba(248, 113, 113, 0.1);
+      --purple: #a78bfa;
+      --purple-dim: rgba(167, 139, 250, 0.1);
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted2: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 36px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .logo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 8px var(--orange);
+    }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .header-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      transition: all .15s;
+      border: 1px solid transparent;
+    }
+
+    .header-link:hover {
+      color: var(--text);
+      background: var(--surface2);
+      border-color: var(--border);
+    }
+
+    .header-link.highlight {
+      color: var(--orange);
+      border-color: rgba(255, 94, 36, .3);
+      background: var(--orange-dim);
+    }
+
+    /* ── Hero / CTA ── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 2rem 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      background: radial-gradient(ellipse 60% 120px at 50% 0%, rgba(255, 94, 36, .06) 0%, transparent 100%);
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .hero-title span {
+      color: var(--orange);
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    .analyse-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 32px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      box-shadow: 0 0 24px rgba(255, 94, 36, .3);
+      letter-spacing: .02em;
+    }
+
+    .analyse-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 32px rgba(255, 94, 36, .45);
+    }
+
+    .analyse-btn:active {
+      transform: translateY(0);
+    }
+
+    .analyse-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-icon {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, .7);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .btn-icon::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .btn-spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, .3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 15px;
+      color: var(--muted);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 20px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted2);
+      flex-shrink: 0;
+    }
+
+    .status-dot.active {
+      background: var(--teal);
+      box-shadow: 0 0 6px var(--teal);
+    }
+
+    .status-dot.error {
+      background: var(--red);
+    }
+
+    /* ── Main panels ── */
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .panel {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel:last-child {
+      border-right: none;
+    }
+
+    .panel-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      position: sticky;
+      top: 56px;
+    }
+
+    .panel-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 15px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--blue-dim);
+      color: var(--blue);
+      border: 1px solid rgba(56, 189, 248, .2);
+    }
+
+    .panel-badge.orange {
+      background: var(--orange-dim);
+      color: var(--orange);
+      border-color: rgba(255, 94, 36, .2);
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      padding-top: 28px;
+    }
+
+    /* ── Agent result ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 240px;
+      gap: 10px;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      width: 40px;
+      height: 40px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .empty-label {
+      font-size: 13px;
+    }
+
+    .agent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .agent-field {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .agent-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field-label {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .field-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 18px;
+      color: var(--text);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .field-value.id {
+      color: var(--teal);
+      font-size: 18px;
+    }
+
+    .field-value.score {
+      font-size: 20px;
+      color: var(--text);
+    }
+
+    .conf-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .conf-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--teal);
+      transition: width .6s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .visitor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 15px;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .visitor-badge.seen {
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid rgba(52, 211, 153, .25);
+    }
+
+    .visitor-badge.new {
+      background: var(--blue-dim);
+      color: var(--blue);
+      border: 1px solid rgba(56, 189, 248, .25);
+    }
+
+    /* ── Smart signals ── */
+    .signal-category {
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .cat-header {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      margin-top: 4px;
+      padding-bottom: 6px;
+      padding-top: 2px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .signal-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: 7px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      margin-bottom: 5px;
+      gap: 10px;
+    }
+
+    .signal-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .signal-indicator {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .signal-name {
+      font-size: 18px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .signal-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 18px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .sig-safe {
+      background: var(--green-dim);
+      color: var(--green);
+    }
+
+    .sig-warn {
+      background: var(--amber-dim);
+      color: var(--amber);
+    }
+
+    .sig-danger {
+      background: var(--red-dim);
+      color: var(--red);
+    }
+
+    .sig-info {
+      background: var(--blue-dim);
+      color: var(--blue);
+    }
+
+    .sig-neutral {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .velocity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .vel-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 8px;
+      text-align: center;
+    }
+
+    .vel-period {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .vel-count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    .ip-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 10px 20px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--text);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-up {
+      animation: fadeUp .3s ease both;
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 94, 36, .4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(255, 94, 36, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 94, 36, 0);
+      }
+    }
+
+    .pulsing {
+      animation: pulse-ring 1.5s ease-out infinite;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <header>
+    <a class="logo" href="#">
+      <div class="logo-dot"></div>
+      Fingerprint Inspector
+    </a>
+    <nav class="header-links">
+      <a class="header-link" href="https://docs.fingerprint.com/" target="_blank">Docs</a>
+      <a class="header-link" href="https://docs.fingerprint.com/docs/smart-signals-reference" target="_blank">Smart
+        Signals</a>
+      <a class="header-link" href="https://docs.fingerprint.com/reference/js-agent-v4" target="_blank">JS Agent API</a>
+      <a class="header-link" href="https://docs.fingerprint.com/reference/server-api-v4" target="_blank">Server API</a>
+      <a class="header-link highlight" href="https://dashboard.fingerprint.com/" target="_blank">Dashboard ↗</a>
+    </nav>
+  </header>
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <div class="hero">
+    <h1 class="hero-title">Browser <span>Fingerprint</span> Inspector</h1>
+    <p class="hero-sub">Identify your browser session and analyse its Smart Signals in real time using the Fingerprint
+      JS agent
+      and Server API.
+    <br>
+      Made by Nivedit
+    </p>
+
+    <button class="analyse-btn" id="analyseBtn">
+      <div class="btn-icon" id="btnIcon"></div>
+      Analyse browser
+    </button>
+
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Ready — click to identify this browser</span>
+    </div>
+  </div>
+
+  <!-- ── Panels ────────────────────────────────────────────── -->
+  <div class="panels">
+
+    <!-- Left: JS Agent -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          JS Agent Result
+          <span class="panel-badge">fp.get()</span>
+        </div>
+      </div>
+      <br>
+      <div class="panel-content" id="agentPanel">
+        <div class="empty-state" id="agentEmpty">
+          <div class="empty-icon">⚡</div>
+          <div class="empty-label">Agent result will appear here</div>
+        </div>
+        <div id="agentResult" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Right: Smart Signals -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          Smart Signals
+          <span class="panel-badge orange">Server API</span>
+        </div>
+      </div>
+      <br>
+      <div class="panel-content" id="signalsPanel">
+        <div class="empty-state" id="signalsEmpty">
+          <div class="empty-icon">🛡️</div>
+          <div class="empty-label">Smart Signals will appear here</div>
+        </div>
+        <div id="signalsResult" style="display:none"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Footer ────────────────────────────────────────────── -->
+  <footer>
+    <span>Fingerprint Inspector · Built with Vite + Node.js + Express</span>
+    <span>
+      <a href="https://fingerprint.com" target="_blank">fingerprint.com</a>
+      &nbsp;·&nbsp;
+      <a href="https://docs.fingerprint.com/docs/introduction" target="_blank">Documentation</a>
+      &nbsp;·&nbsp;
+      <a href="https://docs.fingerprint.com/docs/billing" target="_blank">Billing</a>
+    </span>
+  </footer>
+
+  <script type="module">
+    const BACKEND = 'https://fingerprint-backend-n8el.onrender.com'
+
+    const fpPromise = import(`https://fpjscdn.net/v4/${import.meta.env.VITE_FP_API_KEY}`)
+      .then(FP => FP.start())
+
+    // ── UI helpers ──────────────────────────────────────────
+    const btn = document.getElementById('analyseBtn')
+    const btnIcon = document.getElementById('btnIcon')
+    const statusDot = document.getElementById('statusDot')
+    const statusTxt = document.getElementById('statusText')
+
+    function setStatus(state, msg) {
+      statusDot.className = 'status-dot' + (state === 'active' ? ' active' : state === 'error' ? ' error' : '')
+      statusTxt.textContent = msg
+    }
+
+    function setLoading(loading) {
+      btn.disabled = loading
+      btnIcon.className = loading ? 'btn-spinner' : 'btn-icon'
+      if (!loading) btnIcon.innerHTML = ''
+    }
+
+    // ── Render JS Agent result ───────────────────────────────
+    function renderAgent(r) {
+      const conf = r.confidence?.score ?? 1
+      const confPct = Math.round(conf * 100)
+      const seen = r.visitorFound
+
+      document.getElementById('agentEmpty').style.display = 'none'
+      const el = document.getElementById('agentResult')
+      el.style.display = 'block'
+      el.className = 'fade-up'
+      el.innerHTML = `
+      <div class="agent-grid">
+        <div class="agent-field full">
+          <div class="field-label">Visitor ID</div>
+          <div class="field-value id">${r.visitorId || r.visitor_id || '—'}</div>
+        </div>
+        <div class="agent-field">
+          <div class="field-label">Request ID</div>
+          <div class="field-value" style="font-size:18px;color:var(--muted)">${r.requestId || r.event_id || '—'}</div>
+        </div>
+        <div class="agent-field">
+          <div class="field-label">Visitor status</div>
+          <div style="margin-top:4px">
+            <span class="visitor-badge ${seen ? 'seen' : 'new'}">
+              ${seen ? '↩ Returning visitor' : '✦ First-time visitor'}
+            </span>
+          </div>
+        </div>
+        <div class="agent-field full">
+          <div class="field-label">Confidence score — ${confPct}%</div>
+          <div class="field-value score">${conf.toFixed(2)}</div>
+          <div class="conf-bar">
+            <div class="conf-fill" style="width:${confPct}%;background:${conf > 0.9 ? 'var(--teal)' : conf > 0.7 ? 'var(--amber)' : 'var(--red)'}"></div>
+          </div>
+        </div>
+        <div class="agent-field">
+          <div class="field-label">SDK</div>
+          <div class="field-value">${r.sdk?.platform ?? 'js'} v${r.sdk?.version ?? '—'}</div>
+        </div>
+        <div class="agent-field">
+          <div class="field-label">Suspect score</div>
+          <div class="field-value">${r.suspectScore ?? r.suspect_score ?? '—'}</div>
+        </div>
+      </div>
+    `
+    }
+
+    // ── Signal row helper ────────────────────────────────────
+    function sigRow(name, value, cls, display) {
+      return `
+      <div class="signal-row">
+        <div class="signal-left">
+          <div class="signal-indicator" style="background:${cls === 'sig-safe' ? 'var(--green)' :
+          cls === 'sig-warn' ? 'var(--amber)' :
+            cls === 'sig-danger' ? 'var(--red)' :
+              cls === 'sig-info' ? 'var(--blue)' : 'var(--muted2)'
+        }"></div>
+          <span class="signal-name">${name}</span>
+        </div>
+        <span class="signal-val ${cls}">${display ?? value}</span>
+      </div>`
+    }
+
+    function boolSig(name, val, dangerIfTrue = true) {
+      if (val === undefined || val === null) return sigRow(name, '—', 'sig-neutral', '—')
+      const detected = val === true || val === 'bad'
+      const cls = detected ? (dangerIfTrue ? 'sig-danger' : 'sig-warn') : 'sig-safe'
+      return sigRow(name, val, cls, detected ? '⚠ Detected' : '✓ Not detected')
+    }
+
+    // ── Render Smart Signals ─────────────────────────────────
+    function renderSignals(data) {
+      // Support both old (products.xxx.data) and new flat API shapes
+      const p = data.products || {}
+
+      const id = p.identification?.data || data.identification || {}
+      const botd = p.botd?.data || data.botd || {}
+      const ipInf = p.ipInfo?.data || data.ip_info || {}
+      const ibl = p.ipBlocklist?.data || data.ip_blocklist || {}
+      const tor = p.tor?.data || {}
+      const vpn = p.vpn?.data || {}
+      const proxy = p.proxy?.data || {}
+      const incog = p.incognito?.data || {}
+      const tamp = p.tampering?.data || {}
+      const vm = p.virtualMachine?.data || {}
+      const emul = p.emulator?.data || {}
+      const roota = p.rootApps?.data || {}
+      const frida = p.frida?.data || {}
+      const jail = p.jailbroken?.data || {}
+      const clone = p.clonedApp?.data || {}
+      const priv = p.privacySettings?.data || {}
+      const hact = p.highActivity?.data || {}
+      const susp = p.suspectScore?.data || {}
+      const veloc = p.velocity?.data || {}
+      const dev = p.developerTools?.data || {}
+      const locsp = p.locationSpoofing?.data || {}
+      const mitm = p.mitmAttack?.data || {}
+
+      // Flat v4 API shape
+      const flatBot = data.bot
+      const flatProxy = data.proxy
+      const flatVpn = data.vpn
+      const flatIncog = data.incognito
+      const flatTamp = data.tampering
+      const flatVM = data.virtual_machine
+      const flatHact = data.high_activity_device
+      const flatSusp = data.suspect_score
+      const flatVeloc = data.velocity || veloc
+      const flatIpInfo = data.ip_info || ipInf
+      const flatIbl = data.ip_blocklist || ibl
+
+      // resolve helpers
+      const rBool = (a, b) => a !== undefined ? a : (b?.result ?? undefined)
+      const rNum = (a, b) => a !== undefined ? a : (b?.result ?? undefined)
+
+      const botDetected = flatBot === 'bad' || botd?.bot?.result === 'bad'
+      const vpnDetected = rBool(flatVpn, vpn)
+      const proxyDetected = rBool(flatProxy, proxy)
+      const incogDetected = rBool(flatIncog, incog)
+      const tampDetected = rBool(flatTamp, tamp)
+      const vmDetected = rBool(flatVM, vm)
+      const emulDetected = emul?.result
+      const hactDetected = rBool(flatHact, hact)
+      const suspScore = flatSusp ?? susp?.result ?? data.suspect_score
+      const devDetected = dev?.result
+      const locspDetected = locsp?.result
+      const mitmDetected = mitm?.result
+      const torDetected = tor?.result ?? flatIbl?.tor_node
+      const emailSpam = flatIbl?.email_spam ?? ibl?.details?.emailSpam
+      const attackSrc = flatIbl?.attack_source ?? ibl?.details?.attackSource
+
+      // IP info
+      const geo = flatIpInfo?.v4?.geolocation || {}
+      const asn = flatIpInfo?.v4 || {}
+
+      // Velocity
+      const vd = flatVeloc
+
+      document.getElementById('signalsEmpty').style.display = 'none'
+      const el = document.getElementById('signalsResult')
+      el.style.display = 'block'
+      el.className = 'fade-up'
+
+      // Suspect score colour
+      const suspCls = suspScore == null ? 'sig-neutral' :
+        suspScore === 0 ? 'sig-safe' : suspScore < 20 ? 'sig-warn' : 'sig-danger'
+
+      el.innerHTML = `
+
+      <!-- Threat Overview -->
+      <div class="signal-category">
+        <div class="cat-header">⚠ Threat overview</div>
+        ${sigRow('Suspect score', suspScore, suspCls, suspScore != null ? suspScore + '/100' : '—')}
+        ${boolSig('Bot detected', botDetected)}
+        ${boolSig('Browser tampering', tampDetected)}
+        ${boolSig('MITM attack', mitmDetected)}
+        ${boolSig('Location spoofing', locspDetected)}
+        ${boolSig('Developer tools open', devDetected, false)}
+      </div>
+
+      <!-- Network & Anonymisation -->
+      <div class="signal-category">
+        <div class="cat-header">🌐 Network & anonymisation</div>
+        ${boolSig('VPN detected', vpnDetected)}
+        ${boolSig('Proxy detected', proxyDetected)}
+        ${boolSig('Tor exit node', torDetected)}
+        ${boolSig('IP: email spam source', emailSpam)}
+        ${boolSig('IP: attack source', attackSrc)}
+        ${boolSig('Incognito / private mode', incogDetected, false)}
+        ${vpn.originTimezone || data.vpn_origin_timezone ? sigRow('VPN origin timezone', '', 'sig-info', vpn.originTimezone || data.vpn_origin_timezone) : ''}
+      </div>
+
+      <!-- Device Integrity -->
+      <div class="signal-category">
+        <div class="cat-header">🖥 Device integrity</div>
+        ${boolSig('Virtual machine', vmDetected)}
+        ${boolSig('Android emulator', emulDetected)}
+        ${boolSig('Root apps (mobile)', roota?.result)}
+        ${boolSig('Jailbroken (iOS)', jail?.result)}
+        ${boolSig('Frida detected', frida?.result)}
+        ${boolSig('Cloned app', clone?.result)}
+        ${boolSig('Privacy settings', priv?.result, false)}
+        ${boolSig('High-activity device', hactDetected, false)}
+      </div>
+
+      <!-- IP Geolocation -->
+      <div class="signal-category">
+        <div class="cat-header">📍 IP geolocation</div>
+        ${geo.city_name || geo.city?.name ? sigRow('City', '', 'sig-info', geo.city_name || geo.city?.name) : ''}
+        ${geo.country_name || geo.country?.name ? sigRow('Country', '', 'sig-info', `${geo.country_code || geo.country?.code} — ${geo.country_name || geo.country?.name}`) : ''}
+        ${geo.timezone ? sigRow('Timezone', '', 'sig-neutral', geo.timezone) : ''}
+        ${asn.asn_name || asn.asn?.name ? sigRow('ISP / ASN', '', 'sig-neutral', asn.asn_name || asn.asn?.name) : ''}
+        ${(asn.datacenter_result || asn.datacenter?.result) ? sigRow('Datacenter IP', '', 'sig-warn', '⚠ Yes') : sigRow('Datacenter IP', '', 'sig-safe', '✓ No')}
+      </div>
+
+      <!-- Velocity Signals -->
+      ${vd ? `
+      <div class="signal-category">
+        <div class="cat-header">⚡ Velocity — events by visitor</div>
+        <div class="velocity-grid">
+          ${['5m', '1h', '24h'].map(p => {
+        const key = p === '5m' ? '5_minutes' : p === '1h' ? '1_hour' : '24_hours'
+        const altKey = p === '5m' ? '5Minutes' : p === '1h' ? '1Hour' : '24Hours'
+        const v = vd?.events?.intervals?.[key] ?? vd?.events?.[key] ?? '—'
+        return `<div class="vel-chip"><div class="vel-period">${p}</div><div class="vel-count">${v}</div></div>`
+      }).join('')}
+        </div>
+        <div style="margin-top:8px">
+          ${sigRow('Distinct IPs (5m / 1h / 24h)', '', 'sig-neutral',
+        [vd?.distinctIp?.intervals?.['5m'] ?? vd?.distinct_ip?.['5_minutes'],
+        vd?.distinctIp?.intervals?.['1h'] ?? vd?.distinct_ip?.['1_hour'],
+        vd?.distinctIp?.intervals?.['24h'] ?? vd?.distinct_ip?.['24_hours']]
+          .map(v => v ?? '—').join(' / ')
+      )}
+          ${sigRow('Distinct countries (5m / 1h / 24h)', '', 'sig-neutral',
+        [vd?.distinctCountry?.intervals?.['5m'] ?? vd?.distinct_country?.['5_minutes'],
+        vd?.distinctCountry?.intervals?.['1h'] ?? vd?.distinct_country?.['1_hour'],
+        vd?.distinctCountry?.intervals?.['24h'] ?? vd?.distinct_country?.['24_hours']]
+          .map(v => v ?? '—').join(' / ')
+      )}
+        </div>
+      </div>` : ''}
+
+    `
+    }
+
+    // ── Main click handler ───────────────────────────────────
+    btn.addEventListener('click', async () => {
+      setLoading(true)
+      setStatus('active', 'Loading JS agent…')
+      btn.classList.add('pulsing')
+
+      try {
+        // Step 1: JS agent
+        setStatus('active', 'Collecting browser signals…')
+        const fp = await fpPromise
+        const agentResult = await fp.get()
+        renderAgent(agentResult)
+        setStatus('active', 'Fetching Smart Signals from Server API…')
+
+        // Step 2: Server API via backend
+        const requestId = agentResult.event_id || agentResult.requestId
+        const res = await fetch(`${BACKEND}/identify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestId })
+        })
+        const serverData = await res.json()
+        renderSignals(serverData)
+        setStatus('active', `Identified — ${new Date().toLocaleTimeString()}`)
+
+      } catch (err) {
+        console.error(err)
+        setStatus('error', 'Error: ' + err.message)
+      } finally {
+        setLoading(false)
+        btn.classList.remove('pulsing')
+      }
+    })
+  </script>
+</body>
+
+</html>
