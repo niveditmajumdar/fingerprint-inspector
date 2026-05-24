@@ -305,6 +305,8 @@
     newImg.src = `https://cataas.com/cat/gif?${bust}`
   }
 
+  window.loadCat = loadCat // expose to global scope
+
   loadCat()
 
   // ── Fingerprint — runs silently on page load ──────────
