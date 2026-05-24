@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Random Cat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080c14;
+      --surface: #0e1420;
+      --border: #1e2d4a;
+      --orange: #ff5e24;
+      --teal: #00c9a7;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 8px var(--orange);
+    }
+
+    .back-link {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 5px 14px;
+      border-radius: 6px;
+      transition: all .15s;
+    }
+
+    .back-link:hover { color: var(--text); border-color: var(--muted); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      width: 420px;
+      max-width: calc(100vw - 2rem);
+      margin-top: 56px;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 340px;
+      object-fit: cover;
+      display: block;
+      background: var(--border);
+    }
+
+    .card-img.loading {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .card-body {
+      padding: 1.25rem 1.5rem 1.5rem;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .card-title span { color: var(--orange); }
+
+    .card-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-next {
+      flex: 1;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 0;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-next:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-next:active { transform: translateY(0); }
+
+    .btn-inspect {
+      background: transparent;
+      color: var(--teal);
+      border: 1px solid rgba(0,201,167,.3);
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .btn-inspect:hover {
+      background: rgba(0,201,167,.08);
+      border-color: var(--teal);
+    }
+
+    .id-strip {
+      margin-top: 1rem;
+      background: #0a101e;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .id-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .id-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--teal);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .id-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .id-badge.returning {
+      background: rgba(52,211,153,.1);
+      color: #34d399;
+      border: 1px solid rgba(52,211,153,.25);
+    }
+
+    .id-badge.new {
+      background: rgba(56,189,248,.1);
+      color: #38bdf8;
+      border: 1px solid rgba(56,189,248,.25);
+    }
+
+    .fp-status {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .fp-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .fp-dot.done { background: var(--teal); box-shadow: 0 0 5px var(--teal); }
+    .fp-dot.running { background: var(--orange); animation: blink 1s infinite; }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 38px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <div class="logo-dot"></div>
+    Fingerprint Inspector
+  </a>
+  <a class="back-link" href="/">← Back to inspector</a>
+</header>
+
+<div class="card">
+  <img class="card-img loading" id="catImg" alt="A random cat"/>
+  <div class="card-body">
+    <div class="card-title">Here's a <span>cat</span></div>
+    <p class="card-sub">A completely random cat. Nothing else going on here whatsoever.</p>
+    <div class="btn-row">
+      <button class="btn-next" onclick="loadCat()">Next cat 🐱</button>
+      <a class="btn-inspect" href="/">View inspector</a>
+    </div>
+    <div class="id-strip">
+      <span class="id-label">Visitor ID</span>
+      <span class="id-value" id="visitorId">identifying…</span>
+      <span class="id-badge" id="visitorBadge"></span>
+    </div>
+    <div class="fp-status">
+      <div class="fp-dot running" id="fpDot"></div>
+      <span id="fpStatus">Fingerprint running silently…</span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  You're being identified silently · 
+  <a href="https://fingerprint-test-webhook.onrender.com" target="_blank">
+    Watch the webhook live feed ↗
+  </a>
+</footer>
+
+<script type="module">
+  // ── Load cat gif on page load ──────────────────────────
+  function loadCat() {
+    const img = document.getElementById('catImg')
+    img.classList.add('loading')
+    img.src = ''
+    const bust = Date.now()
+    const newImg = new Image()
+    newImg.onload = () => {
+      img.src = newImg.src
+      img.classList.remove('loading')
+    }
+    newImg.src = `https://cataas.com/cat/gif?${bust}`
+  }
+
+  loadCat()
+
+  // ── Fingerprint — runs silently on page load ──────────
+  const fpPromise = import(`https://fpjscdn.net/v4/${import.meta.env.VITE_FP_API_KEY}`)
+    .then(FP => FP.start())
+
+  try {
+    const fp = await fpPromise
+    const result = await fp.get()
+
+    const visitorId = result.visitorId || result.visitor_id || '—'
+    const seen = result.visitorFound ?? result.visitor_found
+
+    document.getElementById('visitorId').textContent = visitorId
+    document.getElementById('visitorBadge').textContent = seen ? '↩ returning' : '✦ new'
+    document.getElementById('visitorBadge').className = 'id-badge ' + (seen ? 'returning' : 'new')
+    document.getElementById('fpDot').className = 'fp-dot done'
+    document.getElementById('fpStatus').textContent =
+      'Identified silently · check the webhook feed'
+
+  } catch (err) {
+    document.getElementById('fpStatus').textContent = 'Identification failed: ' + err.message
+  }
+</script>
+
+</body>
+</html>
